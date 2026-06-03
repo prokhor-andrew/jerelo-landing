@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jerelo — Cold, Composable Computations for Dart</title>
+  <meta name="description" content="Jerelo is a zero-dependency Dart library providing Cont&lt;E, F, A&gt; — a cold, lazy, reusable computation with three outcome channels: success, typed errors, and crashes.">
+  <meta property="og:title" content="Jerelo — Cold, Composable Computations for Dart">
+  <meta property="og:description" content="A minimal functional toolkit for building cold, composable workflows in Dart. Define once. Run anywhere.">
+  <meta property="og:url" content="https://jerelo.io">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo">jerelo<span>.io</span></a>
+      <nav class="navbar__links" aria-label="Main navigation">
+        <a href="https://pub.dev/packages/jerelo" target="_blank" rel="noopener">pub.dev</a>
+        <a href="https://github.com/prokhor-andrew/jerelo-dart/tree/main/documentation" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/prokhor-andrew/jerelo-dart" target="_blank" rel="noopener" class="nav-cta">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero" id="hero">
+    <div class="container hero__inner">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        Dart &middot; Zero dependencies &middot; v2.0.0
+      </div>
+      <h1 class="hero__headline">
+        Cold, composable<br>
+        <span class="hero__accent">computations</span> for Dart
+      </h1>
+      <p class="hero__subtext">
+        Jerelo gives you <code>Cont&lt;E, F, A&gt;</code> — a lazy, reusable computation
+        with three outcome channels: success, typed errors, and crashes.
+        Define once. Run anywhere.
+      </p>
+      <div class="hero__install" id="install-pill" role="button" tabindex="0" aria-label="Copy install command">
+        <span class="hero__install-prefix">$</span>
+        <code>dart pub add jerelo</code>
+        <button class="hero__copy" id="copy-btn" aria-label="Copy to clipboard">&#x2398;</button>
+      </div>
+      <div class="hero__cta">
+        <a href="https://github.com/prokhor-andrew/jerelo-dart/tree/main/documentation" class="btn btn-primary" target="_blank" rel="noopener">Get Started</a>
+        <a href="https://pub.dev/packages/jerelo" class="btn btn-outline" target="_blank" rel="noopener">View on pub.dev</a>
+        <a href="https://github.com/prokhor-andrew/jerelo-dart" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== WHY JERELO ==================== -->
+  <section class="why" id="why">
+    <div class="container">
+      <p class="section-label">The Problem</p>
+      <h2 class="section-title">Why not just Future?</h2>
+      <p class="section-subtitle">
+        Dart's Future is great for one-shot async work. But when your business logic
+        needs to be testable, reusable, or configurable at runtime, it falls short.
+      </p>
+
+      <div class="why-grid">
+
+        <div class="why-card glass-card">
+          <div class="why-card__pills">
+            <span class="pill pill--future">Future</span>
+            <span class="pill-arrow">&#8594;</span>
+            <span class="pill pill--cont">Cont</span>
+          </div>
+          <h3>Hot vs Cold</h3>
+          <p class="why-card__problem">
+            A <code>Future</code> starts executing the moment you create it.
+            You can't store it, clone it, or defer it safely.
+          </p>
+          <p class="why-card__solution">
+            A <code>Cont</code> is cold — nothing runs until you call <code>.run()</code>.
+            Define once, execute as many times as you need with different environments.
+          </p>
+        </div>
+
+        <div class="why-card glass-card">
+          <div class="why-card__pills">
+            <span class="pill pill--future">Future</span>
+            <span class="pill-arrow">&#8594;</span>
+            <span class="pill pill--cont">Cont</span>
+          </div>
+          <h3>One Catch-All Error vs Two Dedicated Channels</h3>
+          <p class="why-card__problem">
+            <code>Future</code> conflates expected business errors with unexpected exceptions.
+            Everything lands in the same catch block.
+          </p>
+          <p class="why-card__solution">
+            <code>Cont</code> keeps them separate: <code>else</code> carries typed business errors of type <code>F</code>,
+            while <code>crash</code> handles unexpected exceptions. Errors are data, not exceptions.
+          </p>
+        </div>
+
+        <div class="why-card glass-card">
+          <div class="why-card__pills">
+            <span class="pill pill--future">Future</span>
+            <span class="pill-arrow">&#8594;</span>
+            <span class="pill pill--cont">Cont</span>
+          </div>
+          <h3>Globals vs Environment Injection</h3>
+          <p class="why-card__problem">
+            Async Dart flows typically rely on global singletons or scattered
+            constructor injection to pass config and dependencies.
+          </p>
+          <p class="why-card__solution">
+            The <code>E</code> type parameter threads an environment through every
+            computation automatically. Use <code>Cont.askThen()</code> to access it anywhere in the chain.
+          </p>
+        </div>
+
+        <div class="why-card glass-card">
+          <div class="why-card__pills">
+            <span class="pill pill--future">Future</span>
+            <span class="pill-arrow">&#8594;</span>
+            <span class="pill pill--cont">Cont</span>
+          </div>
+          <h3>Manual Parallel Wiring vs First-Class Ops</h3>
+          <p class="why-card__problem">
+            Coordinating parallel async work with <code>Future.wait</code> requires
+            manual error handling and offers no control over execution policy.
+          </p>
+          <p class="why-card__solution">
+            <code>Cont.all</code>, <code>Cont.both</code>, <code>Cont.either</code>, and <code>Cont.any</code> compose
+            parallel computations with configurable policies — quit-fast, sequential, or run-all.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FEATURES ==================== -->
+  <section class="features" id="features">
+    <div class="container">
+      <p class="section-label">What You Get</p>
+      <h2 class="section-title">Everything you need, nothing you don't</h2>
+      <p class="section-subtitle">
+        A small, focused API built around a single composable type.
+        No magic, no framework — just functions that compose.
+      </p>
+
+      <div class="features-grid">
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#9679;</div>
+          <h3>Three-Channel Design</h3>
+          <p>
+            One success channel (<code>then</code>) and two failure channels: <code>else</code> for typed business errors
+            and <code>crash</code> for unexpected exceptions. Errors are data, not exceptions.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#10052;</div>
+          <h3>Cold Execution</h3>
+          <p>
+            No computation runs until you call <code>.run()</code>.
+            The same <code>Cont</code> can be executed in production, in tests,
+            and in previews — each with its own environment.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#128100;</div>
+          <h3>Environment Injection</h3>
+          <p>
+            The <code>E</code> type parameter carries config, services, and
+            dependencies without globals. Access it anywhere with
+            <code>Cont.askThen()</code> and scope it with <code>.local()</code>.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#9889;</div>
+          <h3>Parallel Composition</h3>
+          <p>
+            <code>Cont.both</code> and <code>Cont.all</code> merge computations.
+            <code>Cont.either</code> and <code>Cont.any</code> race them.
+            Configure with quit-fast, sequential, or run-all policies.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#128274;</div>
+          <h3>Zero Dependencies</h3>
+          <p>
+            Pure Dart. No external packages, no platform channel, no generated code.
+            Works on Android, iOS, Web, Linux, macOS, and Windows from a single codebase.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#128260;</div>
+          <h3>Cooperative Cancellation</h3>
+          <p>
+            Every <code>.run()</code> returns a <code>ContCancelToken</code>.
+            Call <code>.cancel()</code> to stop in-flight work cooperatively —
+            built into the type, not bolted on.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CODE SHOWCASE ==================== -->
+  <section class="showcase" id="examples">
+    <div class="container">
+      <p class="section-label">In Practice</p>
+      <h2 class="section-title">See it in action</h2>
+      <p class="section-subtitle">
+        Real patterns from production-grade Dart code.
+      </p>
+
+      <div class="showcase__panel glass-card">
+        <div class="tabs" role="tablist" aria-label="Code examples">
+          <button class="tab-btn active" role="tab" data-tab="define" aria-selected="true">Define &amp; Reuse</button>
+          <button class="tab-btn" role="tab" data-tab="parallel" aria-selected="false">Parallel Ops</button>
+          <button class="tab-btn" role="tab" data-tab="channels" aria-selected="false">Three Channels</button>
+        </div>
+
+        <div class="tab-content">
+
+          <div class="tab-panel active" id="tab-define" role="tabpanel">
+            <pre><code class="language-dart">import 'package:jerelo/jerelo.dart';
+
+// Build a reusable computation — nothing runs yet.
+Cont&lt;AppConfig, String, User&gt; getUserData(String userId) {
+  return fetchUserFromApi(userId)
+    // Stay on 'then' only if the user is active.
+    .thenIf(
+      (user) =&gt; user.isActive,
+      fallback: 'User account is not active',
+    )
+    // If API fails or user inactive, try cache (with access to env).
+    .elseDoWithEnv((config, error) {
+      return config.enableCache
+        ? loadUserFromCache(userId)
+        : Cont.error(error);
+    })
+    // Side effect: log access without altering the value.
+    .thenTap((user) =&gt; logAccess(user))
+    // Convert any unexpected exception into a typed error.
+    .crashRecoverElse((crash) =&gt; 'Unexpected error: $crash');
+}
+
+// The same computation runs with different configs.
+final flow = getUserData('user-42');
+
+flow.run(prodConfig,
+  onElse:  (error) =&gt; print('Error: $error'),
+  onThen:  (user)  =&gt; print('Got: ${user.name}'),
+);
+
+flow.run(testConfig,
+  onElse:  (error) =&gt; print('Error: $error'),
+  onThen:  (user)  =&gt; print('Got: ${user.name}'),
+);</code></pre>
+          </div>
+
+          <div class="tab-panel" id="tab-parallel" role="tabpanel">
+            <pre><code class="language-dart">import 'package:jerelo/jerelo.dart';
+
+// Run fetch and name-validation in parallel.
+// Both must succeed; fail fast on the first error.
+Cont&lt;void, String, UserProfile&gt; fetchAndUpdate(
+  String accessToken, {
+  required String newName,
+}) {
+  return Cont.both(
+    getUserProfile(accessToken),
+    validateName(newName),
+    (profile, validName) =&gt; profile.copyWith(name: validName),
+    policy: OkPolicy.quitFast(),
+  ).thenDo((merged) {
+    return updateUserProfile(accessToken, merged);
+  });
+}
+
+// Fetch multiple users concurrently; preserve order.
+Cont&lt;AppConfig, String, List&lt;User&gt;&gt; getUsers(List&lt;String&gt; ids) {
+  return Cont.all(
+    ids.map(getUserData).toList(),
+    policy: OkPolicy.quitFast(),
+  );
+}
+
+// Race two strategies — normal login vs. stored refresh token.
+// Return whichever succeeds first.
+final loginFlow = Cont.either(
+  loginRequest('user@test.com', 'password'),
+  refreshTokenLogin(storedToken),
+  (e1, e2) =&gt; '$e1; $e2',
+  policy: OkPolicy.sequence(),
+);</code></pre>
+          </div>
+
+          <div class="tab-panel" id="tab-channels" role="tabpanel">
+            <pre><code class="language-dart">import 'package:jerelo/jerelo.dart';
+
+// Build the full login-to-session flow.
+final loginToSession = loginRequest('user@test.com', 'secret')
+  .thenDo((token) {
+    return getUserProfile(token.accessToken)
+      .thenMap((profile) =&gt; Session(token: token, profile: profile));
+  })
+  // Log the session without changing its value.
+  .thenTap((session) {
+    print('[LOG] Authenticated as ${session.profile.name}');
+    return Cont.of(());
+  });
+
+// Execute — all three outcome channels handled explicitly.
+final token = loginToSession.run(
+  null,
+  // Success channel: computation produced a value.
+  onThen: (session) {
+    print('Welcome, ${session.profile.name}!');
+  },
+  // Else channel: expected business error (typed as String here).
+  onElse: (error) {
+    print('Login failed: $error');
+  },
+  // Crash channel: unexpected exception — never swallowed silently.
+  onCrash: (crash) {
+    print('Unexpected crash: $crash');
+  },
+);
+
+// Cancel at any time — cooperative, no forced kill.
+// token.cancel();</code></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GET STARTED ==================== -->
+  <section class="get-started" id="get-started">
+    <div class="container">
+      <p class="section-label">Quick Start</p>
+      <h2 class="section-title">Up and running in minutes</h2>
+      <p class="section-subtitle">
+        Three steps from zero to your first composable computation.
+      </p>
+
+      <ol class="steps">
+
+        <li class="step">
+          <div class="step__number">01</div>
+          <div class="step__content">
+            <h3>Add the dependency</h3>
+            <pre><code class="language-bash">dart pub add jerelo</code></pre>
+          </div>
+        </li>
+
+        <li class="step">
+          <div class="step__number">02</div>
+          <div class="step__content">
+            <h3>Import it</h3>
+            <pre><code class="language-dart">import 'package:jerelo/jerelo.dart';</code></pre>
+          </div>
+        </li>
+
+        <li class="step">
+          <div class="step__number">03</div>
+          <div class="step__content">
+            <h3>Write your first Cont</h3>
+            <pre><code class="language-dart">// A cold computation — nothing runs yet.
+final greeting = Cont.of&lt;(), Never, String&gt;('world')
+  .thenMap((name) =&gt; 'Hello, $name!');
+
+// Run it whenever, as many times as you like.
+greeting.run((), onThen: print); // Hello, world!</code></pre>
+          </div>
+        </li>
+
+      </ol>
+
+      <div class="get-started__links">
+        <a href="https://github.com/prokhor-andrew/jerelo-dart/tree/main/documentation" class="btn btn-primary" target="_blank" rel="noopener">Read the Docs</a>
+        <a href="https://pub.dev/packages/jerelo" class="btn btn-outline" target="_blank" rel="noopener">View on pub.dev</a>
+        <a href="https://github.com/prokhor-andrew/jerelo-dart" class="btn btn-outline" target="_blank" rel="noopener">Star on GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <span class="footer__logo">jerelo</span>
+          <span class="footer__version">v2.0.0</span>
+        </div>
+        <nav class="footer__links" aria-label="Footer navigation">
+          <a href="https://github.com/prokhor-andrew/jerelo-dart" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://pub.dev/packages/jerelo" target="_blank" rel="noopener">pub.dev</a>
+          <a href="https://github.com/prokhor-andrew/jerelo-dart/tree/main/documentation" target="_blank" rel="noopener">Documentation</a>
+          <a href="https://github.com/prokhor-andrew/jerelo-dart/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+        </nav>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__tagline">Jerelo &mdash; Ukrainian for &ldquo;source&rdquo; or &ldquo;spring&rdquo;</p>
+        <p class="footer__copy">MIT License</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        document.getElementById('tab-' + panel).classList.add('active');
+      });
+    });
+
+    // Copy install command
+    const copyBtn = document.getElementById('copy-btn');
+    const installPill = document.getElementById('install-pill');
+
+    function copyInstall() {
+      navigator.clipboard.writeText('dart pub add jerelo').then(() => {
+        copyBtn.textContent = '✓';
+        copyBtn.style.color = 'var(--accent)';
+        setTimeout(() => {
+          copyBtn.textContent = '⎘';
+          copyBtn.style.color = '';
+        }, 1500);
+      }).catch(() => {});
+    }
+
+    copyBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      copyInstall();
+    });
+
+    installPill.addEventListener('click', copyInstall);
+
+    installPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        copyInstall();
+      }
+    });
+
+    // Scroll-reveal
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.glass-card').forEach(el => revealObserver.observe(el));
+    document.querySelectorAll('.step').forEach(el => revealObserver.observe(el));
+
+    // Hero always visible on load
+    document.querySelector('.hero__inner').classList.add('visible');
+  </script>
+
+</body>
+</html>
