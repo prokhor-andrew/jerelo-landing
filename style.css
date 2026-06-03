@@ -43,6 +43,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -630,6 +631,7 @@ code {
 
 .step__content {
   flex: 1;
+  min-width: 0;
 }
 
 .step__content h3 {
