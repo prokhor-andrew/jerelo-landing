@@ -33,6 +33,73 @@
 }
 
 /* ============================================================
+   LIGHT THEME VARIABLES
+   ============================================================ */
+html[data-theme="light"] {
+  --bg-base: #f6f8fb;
+  --bg-surface: #edf0f5;
+  --bg-elevated: #e4e8f0;
+  --bg-card: #ffffff;
+
+  --accent: #009e80;
+  --accent-dim: rgba(0, 158, 128, 0.10);
+  --accent-glow: rgba(0, 158, 128, 0.06);
+  --accent-border: rgba(0, 158, 128, 0.30);
+
+  --text-primary: #0d1117;
+  --text-secondary: #4a5568;
+  --text-muted: #7e8da0;
+  --text-code: #006b58;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* JS-disabled fallback: follow system preference */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-base: #f6f8fb;
+    --bg-surface: #edf0f5;
+    --bg-elevated: #e4e8f0;
+    --bg-card: #ffffff;
+
+    --accent: #009e80;
+    --accent-dim: rgba(0, 158, 128, 0.10);
+    --accent-glow: rgba(0, 158, 128, 0.06);
+    --accent-border: rgba(0, 158, 128, 0.30);
+
+    --text-primary: #0d1117;
+    --text-secondary: #4a5568;
+    --text-muted: #7e8da0;
+    --text-code: #006b58;
+
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Restore dark vars when user explicitly chose dark on a light-preference system */
+  html[data-theme="dark"] {
+    --bg-base: #0d1117;
+    --bg-surface: #161b27;
+    --bg-elevated: #1e2535;
+    --bg-card: #161d2e;
+
+    --accent: #00d4aa;
+    --accent-dim: rgba(0, 212, 170, 0.12);
+    --accent-glow: rgba(0, 212, 170, 0.07);
+    --accent-border: rgba(0, 212, 170, 0.28);
+
+    --text-primary: #e4e8f0;
+    --text-secondary: #7e8da0;
+    --text-muted: #4a5568;
+    --text-code: #9ecfbf;
+
+    --border: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* ============================================================
    RESET & BASE
    ============================================================ */
 *, *::before, *::after {
@@ -54,6 +121,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 a {
@@ -795,6 +863,92 @@ code {
 
   .hero__install {
     font-size: 0.85rem;
+  }
+}
+
+/* ============================================================
+   THEME TOGGLE BUTTON
+   ============================================================ */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  background: var(--accent-dim);
+}
+
+/* Dark mode: show sun icon (click → go light) */
+.theme-toggle .icon-moon { display: none; }
+.theme-toggle .icon-sun  { display: flex; }
+
+/* Light mode: show moon icon (click → go dark) */
+html[data-theme="light"] .theme-toggle .icon-moon { display: flex; }
+html[data-theme="light"] .theme-toggle .icon-sun  { display: none; }
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) .theme-toggle .icon-moon { display: flex; }
+  html:not([data-theme="dark"]) .theme-toggle .icon-sun  { display: none; }
+}
+
+/* ============================================================
+   LIGHT MODE OVERRIDES
+   ============================================================ */
+
+/* Navbar background is hardcoded — override for light mode */
+html[data-theme="light"] .navbar {
+  background: rgba(246, 248, 251, 0.85);
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) .navbar {
+    background: rgba(246, 248, 251, 0.85);
+  }
+}
+
+/* Code showcase panel — keep dark so Prism Tomorrow theme stays readable */
+html[data-theme="light"] .showcase__panel {
+  background: #161d2e;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="light"] .showcase__panel .tabs {
+  background: #1e2535;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="light"] .step__content pre {
+  background: #1e2535 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) .showcase__panel {
+    background: #161d2e;
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  html:not([data-theme="dark"]) .showcase__panel .tabs {
+    background: #1e2535;
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  html:not([data-theme="dark"]) .step__content pre {
+    background: #1e2535 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
   }
 }
 
