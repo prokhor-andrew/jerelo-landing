@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)})()</script>
+  <script>(function(){document.documentElement.setAttribute('data-theme',matchMedia('(prefers-color-scheme:light)').matches?'light':'dark')})()</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jerelo — Cold, Composable Computations for Dart</title>
   <meta name="description" content="Jerelo is a zero-dependency Dart library providing Cont&lt;E, F, A&gt; — a cold, lazy, reusable computation with three outcome channels: success, typed errors, and crashes.">
@@ -504,9 +504,7 @@ greeting.run((), onThen: print); // Hello, world!</code></pre>
     (function () {
       var html = document.documentElement;
       document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
+        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
       });
     })();
   </script>
