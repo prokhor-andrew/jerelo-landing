@@ -5,7 +5,7 @@
   <script>(function(){document.documentElement.setAttribute('data-theme',matchMedia('(prefers-color-scheme:light)').matches?'light':'dark')})()</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jerelo — Cold, Composable Computations for Dart</title>
-  <meta name="description" content="Jerelo is a zero-dependency Dart library providing Cont&lt;E, F, A&gt; — a cold, lazy, reusable computation with three outcome channels: success, typed errors, and crashes.">
+  <meta name="description" content="Jerelo is a zero-dependency Dart library providing Cont&lt;E, F, A&gt; — a cold, lazy, reusable computation with three outcome channels: success, typed errors, and crashes. Stack-safe, cancellable, and environment-aware.">
   <meta property="og:title" content="Jerelo — Cold, Composable Computations for Dart">
   <meta property="og:description" content="A minimal functional toolkit for building cold, composable workflows in Dart. Define once. Run anywhere.">
   <meta property="og:url" content="https://jerelo.io">
@@ -48,7 +48,7 @@
     <div class="container hero__inner">
       <div class="hero__badge">
         <span class="hero__badge-dot"></span>
-        Dart &middot; Zero dependencies &middot; v2.0.0
+        Dart &middot; Zero dependencies &middot; v3.0.0
       </div>
       <h1 class="hero__headline">
         Cold, composable<br>
@@ -218,11 +218,41 @@
 
         <div class="feature-card glass-card">
           <div class="feature-card__icon">&#128260;</div>
-          <h3>Cooperative Cancellation</h3>
+          <h3>Cancellation</h3>
           <p>
             Every <code>.run()</code> returns a <code>ContCancelToken</code>.
-            Call <code>.cancel()</code> to stop in-flight work cooperatively —
-            built into the type, not bolted on.
+            <code>cancel()</code> is forwarded to whatever is running, and each
+            <code>Cont.fromRun</code> leaf returns a canceller that decides how to stop
+            and reports the result through the usual channels.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#9851;</div>
+          <h3>Stack-Safe Composition</h3>
+          <p>
+            <code>thenDo</code>, <code>elseDo</code>, <code>crashDo</code>,
+            <code>fromDeferred</code> and <code>local</code> run in a loop, not by recursion.
+            Chains built with <code>fold</code> or in a loop can have any number of steps.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#128230;</div>
+          <h3>Resource Safety</h3>
+          <p>
+            <code>Cont.bracket</code> acquires a resource, uses it, and runs the release
+            once the use reports back on any channel: success, error, or crash.
+          </p>
+        </div>
+
+        <div class="feature-card glass-card">
+          <div class="feature-card__icon">&#128257;</div>
+          <h3>Loops &amp; Retries</h3>
+          <p>
+            <code>thenWhile</code>, <code>elseWhile</code> and <code>crashWhile</code>
+            repeat a computation, with <code>*Until</code> and <code>*Unless</code> variants
+            for conditions. Build retry logic without writing a loop.
           </p>
         </div>
 
@@ -244,6 +274,8 @@
           <button class="tab-btn active" role="tab" data-tab="define" aria-selected="true">Define &amp; Reuse</button>
           <button class="tab-btn" role="tab" data-tab="parallel" aria-selected="false">Parallel Ops</button>
           <button class="tab-btn" role="tab" data-tab="channels" aria-selected="false">Three Channels</button>
+          <button class="tab-btn" role="tab" data-tab="cancel" aria-selected="false">Cancellation</button>
+          <button class="tab-btn" role="tab" data-tab="stack" aria-selected="false">Stack Safety</button>
         </div>
 
         <div class="tab-content">
@@ -354,10 +386,76 @@ final token = loginToSession.run(
   },
 );
 
-// Cancel at any time — cooperative, no forced kill.
+// Cancel at any time. The running leaf decides how to stop and
+// reports through one of the channels above.
 // token.cancel();</code></pre>
           </div>
 
+
+          <div class="tab-panel" id="tab-cancel" role="tabpanel">
+            <pre><code class="language-dart">import 'dart:async';
+import 'dart:io';
+import 'package:jerelo/jerelo.dart';
+
+// A leaf returns a canceller: it decides what cancelling means.
+Cont&lt;(), String, String&gt; download(String url) {
+  return Cont.fromRun((env, observer) {
+    final timer = Timer(Duration(seconds: 2), () {
+      observer.onThen('contents of $url');
+    });
+    // Stop the work and report through a channel.
+    return () {
+      timer.cancel();
+      observer.onElse('cancelled');
+    };
+  });
+}
+
+final token = download('https://example.com')
+  .thenMap((body) =&gt; body.length)
+  .run(
+    (),
+    onElse: (e) =&gt; print('else: $e'), // else: cancelled
+    onThen: (n) =&gt; print('got $n'),
+  );
+
+token.cancel(); // forwarded to the running leaf
+
+// bracket: release runs once `use` reports back, on any channel.
+Cont&lt;(), String, String&gt; readFile(String path) {
+  return Cont.bracket&lt;RandomAccessFile, (), String, String&gt;(
+    acquire: openFile(path),
+    release: (file) =&gt; closeFile(file),
+    use: (file) =&gt; Cont.of('${file.lengthSync()} bytes'),
+  );
+}</code></pre>
+          </div>
+
+          <div class="tab-panel" id="tab-stack" role="tabpanel">
+            <pre><code class="language-dart">import 'package:jerelo/jerelo.dart';
+
+// One million sequential steps, built in a loop.
+var chain = Cont.of&lt;(), String, int&gt;(0);
+for (var i = 0; i &lt; 1000000; i++) {
+  chain = chain.thenDo((n) =&gt; Cont.of(n + 1));
+}
+
+// Runs in constant stack space: no overflow, no lost outcome.
+chain.run((), onThen: print); // 1000000
+
+// The same holds for thenMap, elseDo, crashDo,
+// Cont.fromDeferred and local, and for recursion:
+Cont&lt;(), String, int&gt; count(int i) {
+  return i == 1000000
+    ? Cont.of(i)
+    : Cont.fromDeferred(() =&gt; count(i + 1));
+}
+
+// A Cont is data, so it can run any number of times,
+// also concurrently — each run has its own state.
+count(0).run((), onThen: print);
+count(0).run((), onThen: print);</code></pre>
+          </div>
         </div>
       </div>
     </div>
@@ -419,7 +517,7 @@ greeting.run((), onThen: print); // Hello, world!</code></pre>
       <div class="footer__top">
         <div class="footer__brand">
           <span class="footer__logo">jerelo</span>
-          <span class="footer__version">v2.0.0</span>
+          <span class="footer__version">v3.0.0</span>
         </div>
         <nav class="footer__links" aria-label="Footer navigation">
           <a href="https://github.com/prokhor-andrew/jerelo-dart" target="_blank" rel="noopener">GitHub</a>
