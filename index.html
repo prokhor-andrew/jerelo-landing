@@ -48,7 +48,7 @@
     <div class="container hero__inner">
       <div class="hero__badge">
         <span class="hero__badge-dot"></span>
-        Dart &middot; Zero dependencies &middot; v3.0.0
+        Dart &middot; Zero dependencies &middot; v4.0.0
       </div>
       <h1 class="hero__headline">
         Cold, composable<br>
@@ -242,7 +242,9 @@
           <h3>Resource Safety</h3>
           <p>
             <code>Cont.bracket</code> acquires a resource, uses it, and runs the release
-            once the use reports back on any channel: success, error, or crash.
+            once the use reports on any channel: success, error, or crash. The outcome
+            is reported only after the release has finished, and the release sees how
+            the use ended.
           </p>
         </div>
 
@@ -421,11 +423,11 @@ final token = download('https://example.com')
 
 token.cancel(); // forwarded to the running leaf
 
-// bracket: release runs once `use` reports back, on any channel.
+// bracket: release runs once `use` reports, then the outcome is reported.
 Cont&lt;(), String, String&gt; readFile(String path) {
   return Cont.bracket&lt;RandomAccessFile, (), String, String&gt;(
     acquire: openFile(path),
-    release: (file) =&gt; closeFile(file),
+    release: (file, outcome) =&gt; closeFile(file),
     use: (file) =&gt; Cont.of('${file.lengthSync()} bytes'),
   );
 }</code></pre>
@@ -517,7 +519,7 @@ greeting.run((), onThen: print); // Hello, world!</code></pre>
       <div class="footer__top">
         <div class="footer__brand">
           <span class="footer__logo">jerelo</span>
-          <span class="footer__version">v3.0.0</span>
+          <span class="footer__version">v4.0.0</span>
         </div>
         <nav class="footer__links" aria-label="Footer navigation">
           <a href="https://github.com/prokhor-andrew/jerelo-dart" target="_blank" rel="noopener">GitHub</a>
